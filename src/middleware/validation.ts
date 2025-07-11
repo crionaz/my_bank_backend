@@ -3,19 +3,12 @@ import { body, validationResult } from 'express-validator';
 
 // Validation rules for user registration
 export const validateRegistration = [
-  body('firstName')
+  body('name')
     .trim()
-    .isLength({ min: 2, max: 50 })
-    .withMessage('First name must be between 2 and 50 characters')
+    .isLength({ min: 3, max: 50 })
+    .withMessage('name must be between 3 and 50 characters')
     .matches(/^[a-zA-Z\s]+$/)
-    .withMessage('First name can only contain letters and spaces'),
-
-  body('lastName')
-    .trim()
-    .isLength({ min: 2, max: 50 })
-    .withMessage('Last name must be between 2 and 50 characters')
-    .matches(/^[a-zA-Z\s]+$/)
-    .withMessage('Last name can only contain letters and spaces'),
+    .withMessage('name can only contain letters and spaces'),
 
   body('email')
     .isEmail()
@@ -114,21 +107,13 @@ export const validatePasswordChange = [
 
 // Validation rules for profile update
 export const validateProfileUpdate = [
-  body('firstName')
+  body('name')
     .optional()
     .trim()
-    .isLength({ min: 2, max: 50 })
-    .withMessage('First name must be between 2 and 50 characters')
+    .isLength({ min: 3, max: 50 })
+    .withMessage('Name must be between 3 and 50 characters')
     .matches(/^[a-zA-Z\s]+$/)
-    .withMessage('First name can only contain letters and spaces'),
-
-  body('lastName')
-    .optional()
-    .trim()
-    .isLength({ min: 2, max: 50 })
-    .withMessage('Last name must be between 2 and 50 characters')
-    .matches(/^[a-zA-Z\s]+$/)
-    .withMessage('Last name can only contain letters and spaces'),
+    .withMessage('Name can only contain letters and spaces'),
 
   body('phoneNumber')
     .optional()
@@ -145,6 +130,28 @@ export const validateProfileUpdate = [
       }
       return true;
     }),
+
+  // Middleware to handle validation errors
+  (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const errorMessages = errors.array().map(error => error.msg);
+      res.status(400).json({
+        success: false,
+        error: 'Validation Error',
+        details: errorMessages,
+      });
+      return;
+    }
+    next();
+  },
+];
+
+// Validation rules for admin user status update
+export const validateUserStatusUpdate = [
+  body('status')
+    .isIn(['active', 'inactive', 'suspended', 'frozen'])
+    .withMessage('Status must be one of: active, inactive, suspended, frozen'),
 
   // Middleware to handle validation errors
   (req: Request, res: Response, next: NextFunction) => {

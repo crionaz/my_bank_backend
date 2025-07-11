@@ -2,22 +2,15 @@ import mongoose, { Document, Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
+
 export interface IUser extends Document {
-  firstName: string;
-  lastName: string;
+  name: string;
   email: string;
   password: string;
   role: 'user' | 'admin';
-  isActive: boolean;
-  emailVerified: boolean;
-  phoneNumber?: string;
-  address?: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-  };
+  status: 'active' | 'inactive' | 'suspended' | 'frozen';
+  phone?: string;
+  address?: string;
   dateOfBirth?: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -34,17 +27,11 @@ export interface IUser extends Document {
 }
 
 const userSchema = new Schema<IUser>({
-  firstName: {
+  name: {
     type: String,
-    required: [true, 'Please add a first name'],
+    required: [true, 'Please add name'],
     trim: true,
-    maxlength: [50, 'First name cannot be more than 50 characters'],
-  },
-  lastName: {
-    type: String,
-    required: [true, 'Please add a last name'],
-    trim: true,
-    maxlength: [50, 'Last name cannot be more than 50 characters'],
+    maxlength: [100, 'Name cannot be more than 50 characters'],
   },
   email: {
     type: String,
@@ -68,25 +55,19 @@ const userSchema = new Schema<IUser>({
     enum: ['user', 'admin'],
     default: 'user',
   },
-  isActive: {
-    type: Boolean,
-    default: true,
+  status: {
+    type: String,
+    enum: ['active', 'inactive', 'suspended', 'frozen'],
+    default: 'active',
   },
-  emailVerified: {
-    type: Boolean,
-    default: false,
-  },
-  phoneNumber: {
+  phone: {
     type: String,
     trim: true,
     match: [/^\+?[\d\s-()]+$/, 'Please add a valid phone number'],
   },
   address: {
-    street: { type: String, trim: true },
-    city: { type: String, trim: true },
-    state: { type: String, trim: true },
-    zipCode: { type: String, trim: true },
-    country: { type: String, trim: true, default: 'US' },
+    type: String,
+    trim: true,
   },
   dateOfBirth: {
     type: Date,
@@ -115,22 +96,22 @@ const userSchema = new Schema<IUser>({
   },
   toObject: {
     virtuals: true,
-  },
+  }
 });
 
-// Virtual for full name
-userSchema.virtual('fullName').get(function(this: IUser) {
-  return `${this.firstName} ${this.lastName}`;
-});
 
 // Virtual for isLocked
 userSchema.virtual('isLocked').get(function(this: IUser) {
   return !!(this.lockUntil && this.lockUntil > new Date());
 });
 
+//Virtual for isActive
+userSchema.virtual('isActive').get(function(this: IUser) {
+  return this.status === 'active';
+});
+
 // Indexes
-userSchema.index({ email: 1 });
-userSchema.index({ isActive: 1 });
+userSchema.index({ status: 1 });
 userSchema.index({ role: 1 });
 
 // Pre-save middleware to hash password
