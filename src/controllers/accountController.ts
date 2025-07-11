@@ -1,22 +1,6 @@
 import { Request, Response } from 'express';
 import Accounts from '@/models/Accounts';
 
-interface Params {
-  id: string;
-}
-
-export const getAllAccounts = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
-  try {
-    const accounts = await Accounts.find();
-    res.status(200).json(accounts);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching accounts', error });
-  }
-};
-
 export const getAccountById = async (
   req: Request,
   res: Response
