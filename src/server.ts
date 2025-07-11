@@ -15,6 +15,8 @@ import { notFound } from '@middleware/notFound';
 import { corsOptions } from '@config/cors';
 import { rateLimitOptions } from '@config/rateLimit';
 import { slowDownOptions } from '@config/slowDown';
+import dotenv from 'dotenv';
+dotenv.config();
 
 // Import routes
 import apiRoutes from '@routes/index';
