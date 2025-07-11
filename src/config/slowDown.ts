@@ -7,10 +7,10 @@ export const slowDownOptions = slowDown({
   maxDelayMs: 5000, // Maximum delay of 5 seconds
   skipFailedRequests: false,
   skipSuccessfulRequests: false,
-  keyGenerator: (req) => {
+  keyGenerator: req => {
     return `${req.ip}-${req.user?.id || 'anonymous'}`;
   },
-  skip: (req) => {
+  skip: req => {
     // Skip slow down for health checks
     return req.path === '/health';
   },
