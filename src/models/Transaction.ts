@@ -1,8 +1,8 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface ITransaction extends Document {
-  fromAccount: mongoose.Types.ObjectId;
-  toAccount: mongoose.Types.ObjectId;
+  fromAccount: string;
+  toAccount: string;
   amount: number;
   type: 'transfer' | 'deposit' | 'withdrawal';
   status?: 'success' | 'failed';
@@ -13,13 +13,11 @@ export interface ITransaction extends Document {
 const transactionSchema = new Schema<ITransaction>(
   {
     fromAccount: {
-      type: Schema.Types.ObjectId,
-      ref: 'Account',
+      type: String,
       required: [true, 'Source account is required'],
     },
     toAccount: {
-      type: Schema.Types.ObjectId,
-      ref: 'Account',
+      type: String,
       required: [true, 'Destination account is required'],
     },
     amount: {

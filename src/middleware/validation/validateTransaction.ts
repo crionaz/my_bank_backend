@@ -3,11 +3,13 @@ import mongoose from 'mongoose';
 
 export const validateTransaction = [
   body('fromAccount')
-    .custom(value => mongoose.Types.ObjectId.isValid(value))
-    .withMessage('Invalid fromAccount ObjectId'),
+    .isString()
+    .matches(/^[0-9]{10,20}$/)
+    .withMessage('Invalid destination account number'),
   body('toAccount')
-    .custom(value => mongoose.Types.ObjectId.isValid(value))
-    .withMessage('Invalid toAccount ObjectId'),
+    .isString()
+    .matches(/^[0-9]{10,20}$/)
+    .withMessage('Invalid destination account number'),
   body('amount')
     .isFloat({ gt: 0 })
     .withMessage('Amount must be greater than 0'),

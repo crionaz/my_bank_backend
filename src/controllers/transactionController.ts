@@ -14,9 +14,8 @@ export const createTransaction = async (
 
   try {
     // Validate account existence
-    const source = await Accounts.findById(fromAccount);
-    const destination = await Accounts.findById(toAccount);
-
+    const source = await Accounts.findOne({ accountNumber: fromAccount });
+    const destination = await Accounts.findOne({ accountNumber: toAccount });
     if (!source || !destination) {
       sendResponse(res, 404, {
         status: false,
@@ -67,6 +66,8 @@ export const createTransaction = async (
       data: savedTransaction,
     });
   } catch (error) {
+    console.log(error);
+
     sendResponse(res, 500, {
       status: false,
       message: 'Internal server error',
