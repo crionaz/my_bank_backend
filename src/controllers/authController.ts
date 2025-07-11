@@ -2,11 +2,16 @@ import { Request, Response, NextFunction } from 'express';
 import { User } from '@models/User';
 import { logger } from '@utils/logger';
 import jwt from 'jsonwebtoken';
+import Accounts from '@/models/Accounts';
 
 // @desc    Create account (same as register)
 // @route   POST /api/v1/auth/create-account
 // @access  Public
-export const createAccount = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const createAccount = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const { name, email, password, phone, address, dateOfBirth } = req.body;
 
@@ -63,9 +68,14 @@ export const createAccount = async (req: Request, res: Response, next: NextFunct
 // @route   POST /api/v1/auth/register
 // @access  Public
 
-export const register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const register = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
-    const { name, email, password, role, status, phone, address, dateOfBirth } = req.body;
+    const { name, email, password, role, status, phone, address, dateOfBirth } =
+      req.body;
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
@@ -91,6 +101,17 @@ export const register = async (req: Request, res: Response, next: NextFunction):
 
     logger.info(`New user registered: ${user.email}`);
 
+    // Automatically create a new account for the user
+    const account = await Accounts.create({
+      userId: user._id,
+      type: 'savings', // or 'current' based on your logic
+      balance: 0, // default balance
+    });
+
+    logger.info(
+      `Account created for user ${user.email}: ${account.accountNumber}`
+    );
+
     // Create token
     const token = user.getSignedJwtToken();
     const refreshTokenValue = user.getRefreshToken();
@@ -103,6 +124,13 @@ export const register = async (req: Request, res: Response, next: NextFunction):
           name: user.name,
           email: user.email,
           role: user.role,
+        },
+        account: {
+          id: account._id,
+          number: account.accountNumber,
+          type: account.type,
+          balance: account.balance,
+          status: account.status,
         },
         token,
         refreshToken: refreshTokenValue,
@@ -117,7 +145,11 @@ export const register = async (req: Request, res: Response, next: NextFunction):
 // @desc    Login user
 // @route   POST /api/v1/auth/login
 // @access  Public
-export const login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const login = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const { email, password } = req.body;
 
@@ -145,7 +177,8 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
     if (user.isLocked) {
       res.status(423).json({
         success: false,
-        error: 'Account is temporarily locked due to too many failed login attempts',
+        error:
+          'Account is temporarily locked due to too many failed login attempts',
       });
       return;
     }
@@ -165,7 +198,7 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
     if (!isMatch) {
       // Increment login attempts
       await user.incLoginAttempts();
-      
+
       res.status(401).json({
         success: false,
         error: 'Invalid credentials',
@@ -232,7 +265,11 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
 // @desc    Refresh token
 // @route   POST /api/v1/auth/refresh-token
 // @access  Public
-export const refreshToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const refreshToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const { refreshToken } = req.body;
 
@@ -253,7 +290,7 @@ export const refreshToken = async (req: Request, res: Response, next: NextFuncti
       });
       return;
     }
-    
+
     const decoded = jwt.verify(refreshToken, refreshSecret) as { id: string };
 
     // Find user
