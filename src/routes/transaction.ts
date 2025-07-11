@@ -1,11 +1,21 @@
 import express from 'express';
 import { authenticate } from '@middleware/auth';
+import {
+  createTransaction,
+  getTransactions,
+} from '../controllers/transactionController';
+import { validateTransaction } from '../middleware/validation/validateTransaction';
+import { validateRequest } from '../middleware/validateRequest';
 
 const router = express.Router();
 
-// Placeholder routes - implement as needed
-router.get('/', authenticate, (req, res) => {
-  res.json({ message: 'Transaction routes working' });
-});
+router.post(
+  '/',
+  authenticate,
+  validateTransaction,
+  validateRequest,
+  createTransaction
+);
+router.get('/', authenticate, getTransactions);
 
 export default router;
