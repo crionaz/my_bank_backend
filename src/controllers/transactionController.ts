@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import mongoose from 'mongoose';
 import { validationResult } from 'express-validator';
 import { Transaction } from '../models/Transaction';
-import { Account } from '../models/Account';
+import Accounts from '@/models/Accounts';
 import { sendResponse } from '@/utils/response';
 
 export const createTransaction = async (
@@ -14,8 +14,8 @@ export const createTransaction = async (
 
   try {
     // Validate account existence
-    const source = await Account.findById(fromAccount);
-    const destination = await Account.findById(toAccount);
+    const source = await Accounts.findById(fromAccount);
+    const destination = await Accounts.findById(toAccount);
 
     if (!source || !destination) {
       sendResponse(res, 404, {
@@ -84,7 +84,7 @@ export const getTransactions = async (req: Request, res: Response) => {
     const query: any = {};
 
     if (userId && mongoose.Types.ObjectId.isValid(userId)) {
-      const userAccounts = await Account.find({ userId }).select('_id');
+      const userAccounts = await Accounts.find({ userId }).select('_id');
       const accountIds = userAccounts.map(acc => acc._id);
 
       query.$or = [

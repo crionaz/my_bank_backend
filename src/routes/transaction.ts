@@ -9,13 +9,7 @@ import { validateRequest } from '../middleware/validateRequest';
 
 const router = express.Router();
 
-router.post(
-  '/',
-  authenticate,
-  validateTransaction,
-  validateRequest,
-  createTransaction
-);
-router.get('/', authenticate, getTransactions);
+router.post('/', validateTransaction, validateRequest, createTransaction);
+router.get('/', getTransactions);
 
 export default router;

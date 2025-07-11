@@ -25,8 +25,8 @@ export const sendResponse = (
     ...(payload.errors && { errors: payload.errors }),
     ...(payload.token && { token: payload.token }),
     ...(payload.user && { user: payload.user }),
-    ...(payload.count && { total: payload.count }),
-    ...(payload.page && { total: payload.page }),
-    ...(payload.limit && { total: payload.limit }),
+    ...(payload.count && { const: payload.count }),
+    ...(payload.page && { page: payload.page }),
+    ...(payload.limit && { limit: payload.limit }),
   });
 };
